@@ -22,8 +22,31 @@ public class NameHandlerTest {
 
     @org.junit.Test
     public void countSpecifStringTest(){
-        String[] args = new String[]{NameHandler.COUNT_SPECIFIC_STRING_ARG, "As"};
+        String[] args = new String[]{NameHandler.COUNT_SPECIFIC_STRING_ARG, "an"};
         NameHandler.main(args);
 
+    }
+
+    @org.junit.Test
+    public void countAllStringsTest(){
+        String[] args = new String[]{NameHandler.COUNT_ALL_STRINGS_ARG, "2"};
+        NameHandler.main(args);
+    }
+
+    @org.junit.Test
+    public void allIncludeStringTest(){
+        String[] args = new String[]{NameHandler.ALL_INCLUDES_STRING_ARG, "A"};
+        NameHandler.main(args);
+    }
+
+    @org.junit.Test
+    public void countMaxStringTest(){
+        String[] args = new String[]{NameHandler.COUNT_MAX_STRING_ARG, "1"};
+        NameHandler.main(args);
+    }
+    @org.junit.Test
+    public void generateNameTest(){
+        String[] args = new String[]{NameHandler.GENERATE_NAME_ARG};
+        NameHandler.main(args);
     }
 }

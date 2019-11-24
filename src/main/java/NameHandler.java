@@ -3,9 +3,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.zip.ZipEntry;
 
 import static java.lang.System.exit;
 import static java.lang.System.setOut;
@@ -20,6 +19,7 @@ public class NameHandler {
     public static final String GENERATE_NAME_ARG = "GenerateName";
     private static final String URL_NAMES_BASE = "https://www.behindthename.com/names/usage/english";
     private static final int UNEXPECTED_EXIT_STATUS = 1;
+    private static final int RANDOM_NAME_LENGTH = 6;
     private List<String> names;
     private static final String NAMES_FILE = "names_list.txt";
     private static final int METHOD_ARG_POS = 0;
@@ -58,22 +58,124 @@ public class NameHandler {
     }
 
     private void generateName() {
+        HashMap<Character,Character> letterToNextLetter = new HashMap<>();
+        List<Character> aToz = getAllCharsInRange('a','z');
+        List<Character> AToZ = getAllCharsInRange('A','Z');
+        List<Character> aTozAndAtoZ = new LinkedList<>();
+        aTozAndAtoZ.addAll(aToz);
+        aTozAndAtoZ.addAll(AToZ);
+        for (char letter :
+                aTozAndAtoZ) {
+            int max = -1;
+            for (char seconLetter :
+                aToz) {
+                String subString = letter +""+ seconLetter;
+                int occur = countAllOccurs(subString);
+                if (max<occur) {
+                    max = occur;
+                    letterToNextLetter.put(letter,seconLetter);
+                }
+            }
+        }
+        int max =-1;
+        char firstLetter=' ';
+        for (char letter :
+                AToZ) {
+            int occur = countAllOccurs(""+letter);
+            if (max<occur) {
+                firstLetter = letter;
+                max=occur;
+            }
+        }
+        StringBuilder generated = new StringBuilder();
+        generated.append(firstLetter);
+        char prevLetter = firstLetter;
+        for (int i = 1; i < RANDOM_NAME_LENGTH; i++) {
+            char currLetter = letterToNextLetter.get(prevLetter);
+            generated.append(currLetter);
+            prevLetter = currLetter;
+        }
+        System.out.println(generated.toString());
+
 
     }
 
-    private void allIncludesString(String substring) {
+    private List<Character> getAllCharsInRange(char startIndex, char endIndex) {
+        List<Character> result = new LinkedList<>();
+        for (int i = startIndex; i <= endIndex ; i++) {
+            result.add((char)i);
+        }
+        return result;
+    }
 
+    private void allIncludesString(String stringToCheck) {
+        String toCheck = stringToCheck.toLowerCase();
+        for (String name :
+                this.names) {
+            if (toCheck.contains(name.toLowerCase()))
+                System.out.println(name.toLowerCase());
+        }
     }
 
     private void countMaxString(int length) {
+        HashMap<String, Integer> result = getSubstringStringIntegerHashMap(length,false);
+        int max =-1;
+        List<String> maxList = new LinkedList<>();
+        for (Map.Entry<String,Integer> entry:
+                result.entrySet()) {
+            int val = entry.getValue();
+            String subString = entry.getKey();
+            if(val > max){
+                maxList.clear();
+                max = val;
+                maxList.add(subString);
+            }
+            else if (val==max)
+                maxList.add(subString);
+        }
+        for (String name :
+                maxList) {
+            System.out.println(name);
+        }
 
     }
 
     private void countAllStrings(int length) {
+        HashMap<String, Integer> result = getSubstringStringIntegerHashMap(length,true);
+        for (Map.Entry<String,Integer> entry:
+                result.entrySet()) {
+            System.out.println(entry.getKey()+":"+entry.getValue().toString());
+        }
+    }
+
+    private HashMap<String, Integer> getSubstringStringIntegerHashMap(int length,boolean caseSensitive) {
+        HashMap<String ,Integer> result = new HashMap<>();
+        for (String name :
+                this.names) {
+            for (int i = 0; i < name.length() - length; i++) {
+                String subName = name.substring(i,i+length);
+                if(!caseSensitive)
+                    subName = subName.toLowerCase();
+                Integer curr = result.getOrDefault(subName,0);
+                result.put(subName,curr+1);
+            }
+        }
+        return result;
     }
 
     private void countSpecificString(String subString) {
-        System.out.println(names.size());
+        int result = countAllOccurs(subString);
+        System.out.println(result);
+    }
+
+    private int countAllOccurs(String subString) {
+        int result = 0;
+        for (String name :
+                this.names) {
+            if (name.contains(subString))
+                result++;
+        }
+        return result;
     }
 
     private boolean initNames() {
@@ -119,7 +221,15 @@ public class NameHandler {
             Elements elementNames = doc.select("span[class=\"listname\"]");
             stringNames.addAll(elementNames.eachText());
         }
-        return stringNames;
+        List<String> ans = new LinkedList<>();
+        for (String name :
+                stringNames) {
+            StringBuilder sbName = new StringBuilder();
+            sbName.append(name.charAt(0));
+            sbName.append(name.substring(1).toLowerCase());
+            ans.add(sbName.toString());
+        }
+        return ans;
     }
 
     private void serializeStringList(String fileName, List<String> obj) throws IOException {
