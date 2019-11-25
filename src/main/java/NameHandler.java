@@ -19,7 +19,7 @@ public class NameHandler {
     public static final String GENERATE_NAME_ARG = "GenerateName";
     private static final String URL_NAMES_BASE = "https://www.behindthename.com/names/usage/english";
     private static final int UNEXPECTED_EXIT_STATUS = 1;
-    private static final int RANDOM_NAME_LENGTH = 6;
+    private static final int RANDOM_NAME_LENGTH = 20;
     private List<String> names;
     private static final String NAMES_FILE = "names_list.txt";
     private static final int METHOD_ARG_POS = 0;
@@ -58,7 +58,7 @@ public class NameHandler {
     }
 
     private void generateName() {
-        HashMap<Character,Character> letterToNextLetter = new HashMap<>();
+        HashMap<Character,List<Character>> letterToNextLetterList = new HashMap<>();
         List<Character> aToz = getAllCharsInRange('a','z');
         List<Character> AToZ = getAllCharsInRange('A','Z');
         List<Character> aTozAndAtoZ = new LinkedList<>();
@@ -73,31 +73,48 @@ public class NameHandler {
                 int occur = countAllOccurs(subString);
                 if (max<occur) {
                     max = occur;
-                    letterToNextLetter.put(letter,seconLetter);
+                    LinkedList<Character> list = new LinkedList<>();
+                    list.add(seconLetter);
+                    letterToNextLetterList.put(letter,list);
+                }
+                else if(max==occur){
+                    List<Character> list =  letterToNextLetterList.getOrDefault(letter,new LinkedList<>());
+                    list.add(seconLetter);
+                    letterToNextLetterList.put(letter,list);
                 }
             }
         }
         int max =-1;
-        char firstLetter=' ';
+        List<Character> firstLetterList=new LinkedList<>();
         for (char letter :
                 AToZ) {
             int occur = countAllOccurs(""+letter);
             if (max<occur) {
-                firstLetter = letter;
+                firstLetterList.clear();
+                firstLetterList.add(letter);
                 max=occur;
             }
+            else if (max==occur)
+                firstLetterList.add(letter);
         }
         StringBuilder generated = new StringBuilder();
+        char firstLetter = getRandomItemFromCharList(firstLetterList);
         generated.append(firstLetter);
         char prevLetter = firstLetter;
         for (int i = 1; i < RANDOM_NAME_LENGTH; i++) {
-            char currLetter = letterToNextLetter.get(prevLetter);
+            List<Character> currLetterList = letterToNextLetterList.get(prevLetter);
+            char currLetter = getRandomItemFromCharList(currLetterList);
             generated.append(currLetter);
             prevLetter = currLetter;
         }
         System.out.println(generated.toString());
 
 
+    }
+
+    public Character getRandomItemFromCharList(List<Character> list) {
+        Random rand = new Random();
+        return  list.get(rand.nextInt(list.size()));
     }
 
     private List<Character> getAllCharsInRange(char startIndex, char endIndex) {
@@ -152,7 +169,7 @@ public class NameHandler {
         HashMap<String ,Integer> result = new HashMap<>();
         for (String name :
                 this.names) {
-            for (int i = 0; i < name.length() - length; i++) {
+            for (int i = 0; i <= name.length() - length; i++) {
                 String subName = name.substring(i,i+length);
                 if(!caseSensitive)
                     subName = subName.toLowerCase();
@@ -227,9 +244,15 @@ public class NameHandler {
             StringBuilder sbName = new StringBuilder();
             sbName.append(name.charAt(0));
             sbName.append(name.substring(1).toLowerCase());
-            ans.add(sbName.toString());
+            if(isValidName(sbName.toString()))
+                ans.add(sbName.toString().strip());
         }
         return ans;
+    }
+
+    private boolean isValidName(String name) {
+        String validPattern = "[a-zA-Z -]+";
+        return name.matches(validPattern);
     }
 
     private void serializeStringList(String fileName, List<String> obj) throws IOException {

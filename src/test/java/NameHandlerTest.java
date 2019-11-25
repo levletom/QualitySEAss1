@@ -22,7 +22,7 @@ public class NameHandlerTest {
 
     @org.junit.Test
     public void countSpecifStringTest(){
-        String[] args = new String[]{NameHandler.COUNT_SPECIFIC_STRING_ARG, "an"};
+        String[] args = new String[]{NameHandler.COUNT_SPECIFIC_STRING_ARG, "Ale"};
         NameHandler.main(args);
 
     }
@@ -35,18 +35,21 @@ public class NameHandlerTest {
 
     @org.junit.Test
     public void allIncludeStringTest(){
-        String[] args = new String[]{NameHandler.ALL_INCLUDES_STRING_ARG, "A"};
+        String[] args = new String[]{NameHandler.ALL_INCLUDES_STRING_ARG, "isabelaAlexCahrly"};
         NameHandler.main(args);
     }
 
     @org.junit.Test
     public void countMaxStringTest(){
-        String[] args = new String[]{NameHandler.COUNT_MAX_STRING_ARG, "1"};
+        String[] args = new String[]{NameHandler.COUNT_MAX_STRING_ARG, "3"};
         NameHandler.main(args);
     }
     @org.junit.Test
     public void generateNameTest(){
-        String[] args = new String[]{NameHandler.GENERATE_NAME_ARG};
-        NameHandler.main(args);
+        for (int i = 0; i < 100; i++) {
+            String[] args = new String[]{NameHandler.GENERATE_NAME_ARG};
+            NameHandler.main(args);
+        }
+
     }
 }
